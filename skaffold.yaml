@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta1
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/pendosystems/demo-deepu:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/pendosystems/demo-deepu:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: demo-deepu
+        chartPath: charts/demo-deepu
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/pendosystems/demo-deepu'
+          image.tag: '{{.DIGEST_HEX}}'
